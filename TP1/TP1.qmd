@@ -1,0 +1,484 @@
+# Exercise 1. Looking at the data (EuStockMarkets)
+
+## (a) Plot the four indices. Describe the general trend of each and the period where they move the most.
+
+
+```{r}
+# Load the dataset
+data("EuStockMarkets", package = "datasets")
+
+# Inspect the dataset
+head(EuStockMarkets)
+str(EuStockMarkets)
+
+# Plot the four stock market indices
+plot(EuStockMarkets)
+
+```
+## **Interpretation:** All four European stock market indices exhibit an overall upward trend during the sample period from 1991 to 1998. The upward movements appear more pronounced from around 1996 onward. However, the magnitude and timing of fluctuations differ between indices. Further inspection of the plots is needed to identify the periods with the largest movements precisely.
+
+
+```{r}
+
+# Extract the stock market indices
+indices <- EuStockMarkets
+
+# Calculate the change between consecutive observations
+changes <- diff(indices)
+
+# Find the largest positive change for each index
+largest_increase <- apply(changes, 2, max)
+
+largest_increase
+
+```
+
+ˆ
+```{r}
+
+# Find the observation where each index has its largest increase
+largest_increase_position <- apply(changes, 2, which.max)
+
+largest_increase_position
+
+# Display the corresponding index values before and after the increase
+for (i in seq_along(largest_increase_position)) {
+  j <- largest_increase_position[i]
+  cat(
+    colnames(indices)[i], ": observation", j,
+    "to", j + 1,
+    "| change =", changes[j, i], "\n"
+  )
+}
+
+```
+```{r}
+j <- which.max(changes[, "SMI"])
+
+indices[j:(j + 1), "SMI"]
+
+```
+```{r}
+
+# Starting values of the four indices
+start_values <- EuStockMarkets[1, ]
+
+# Ending values of the four indices
+end_values <- EuStockMarkets[nrow(EuStockMarkets), ]
+
+# Absolute increase over the whole period
+total_increase <- end_values - start_values
+
+total_increase
+
+```
+```{r}
+
+# Percentage increase over the whole period
+percentage_increase <- (end_values / start_values - 1) * 100
+
+round(percentage_increase, 2)
+
+```
+
+
+## **(a) General trends and largest movements** The four European stock market indices generally exhibit an upward trend over the period 1991–1998, although their trajectories differ. The SMI has the largest single-observation increase, rising from 7,401.4 to 7,640.8, a gain of 239.4 index points. The largest single-observation increases for the DAX, CAC, and FTSE are 160.97, 166.70, and 160.80 points, respectively.
+
+
+## (b) Compute the daily log returns of the four indices. Draw a scatter-plot matrix and compute the correlation matrix. Which two markets are the most correlated, and which market is the least correlated with the others?
+
+```{r}
+
+# Calculate daily log returns
+log_returns <- diff(log(EuStockMarkets))
+
+# Display the first few observations
+head(log_returns)
+
+```
+
+```{r}
+
+# Scatter-plot matrix of daily log returns
+pairs(log_returns)
+
+```
+
+```{r}
+
+
+# Correlation of index levels
+cor(EuStockMarkets)
+
+# Correlation of daily log returns
+cor(log_returns)
+```
+## **Conclusion:** All four European stock market indices have positive correlations in their daily log returns. The strongest correlation is between DAX and CAC (0.734), while the weakest is between SMI and FTSE (0.585). These results indicate that the markets tend to move together, although their daily returns are not perfectly aligned.
+
+
+## For each index, nd the worst daily log return and the date on which it occurred. Do several markets share the same worst day? What event could explain it?
+
+```{r}
+
+# Calculate the worst daily log return for each index
+worst_returns <- apply(log_returns, 2, min)
+
+# Find the observation where each worst return occurred
+worst_positions <- apply(log_returns, 2, which.min)
+
+# Display the results
+data.frame(
+  Index = names(worst_returns),
+  Worst_Log_Return = worst_returns,
+  Observation = worst_positions,
+  Time = time(log_returns)[worst_positions]
+)
+
+```
+
+```{r}
+# Compare all four returns at observation 35
+log_returns[35, ]
+```
+
+## **Interpretation:** The DAX, SMI, and CAC indices experienced their worst daily log returns at observation 35, with values of −0.0963, −0.0838, and −0.0758, respectively. The FTSE experienced a negative log return of −0.0312 at the same observation, but its worst daily return occurred later, at observation 330. All four indices declined at observation 35, suggesting that a common market shock may have affected the four markets, although the magnitude of the decline differed. However, the returns alone cannot identify the cause of this event. Further historical investigation is needed to determine whether a specific event explains the simultaneous declines.
+
+
+## (D) An investor bought the DAX and sold the FTSE short on the rst day. Using log returns only, plot the log of the ratio of the two investments over time. Did the DAX outperform the FTSE over the period?
+
+
+```{r}
+
+# Extract DAX and FTSE index values
+DAX <- EuStockMarkets[, "DAX"]
+FTSE <- EuStockMarkets[, "FTSE"]
+
+# Calculate daily log returns
+dax_returns <- diff(log(DAX))
+ftse_returns <- diff(log(FTSE))
+
+# Calculate the cumulative log return difference
+relative_log_wealth <- cumsum(dax_returns - ftse_returns)
+
+# Plot the relative performance over time
+plot(
+  time(EuStockMarkets)[-1],
+  relative_log_wealth,
+  type = "l",
+  xlab = "Time",
+  ylab = "Log wealth ratio",
+  main = "Relative Performance: DAX vs FTSE"
+)
+
+abline(h = 0, lty = 2, col = "red")
+
+```
+## ### Conclusion
+
+## The purpose of this strategy is to investigate whether the German stock market (DAX) outperforms the UK stock market (FTSE) over time. We take a **long position in DAX** because we expect it to perform better, and a **short position in FTSE** to benefit from its underperformance relative to DAX. By comparing their daily log returns, we can evaluate their relative performance without directly comparing their different index levels.
+
+## The graph shows that the relative performance fluctuates throughout the period. Although FTSE outperforms DAX during some intervals, the cumulative log-return difference becomes positive and rises substantially toward the end of the observation period. This indicates that DAX outperformed FTSE over the full period from 1991 to 1998.
+
+## Therefore, the historical results support the idea that DAX performed better than FTSE during this period. However, this comparison alone does not prove that an actual long–short trading strategy would have been profitable after transaction costs, borrowing costs, and other trading considerations.
+
+# Exercise 2. The normal distribution is not normal (SP500)
+
+## (a) Find the worst day in the sample. Give its log return and its net return, and identify the date.
+
+
+```{r}
+data("SP500", package = "Ecdat")
+
+head(SP500)
+str(SP500)
+summary(SP500)
+```
+```{r}
+sp500_returns <- as.numeric(SP500[, 1])
+
+worst_index <- which.min(sp500_returns)
+worst_log_return <- sp500_returns[worst_index]
+
+worst_net_return <- exp(worst_log_return) - 1
+
+worst_index
+worst_log_return
+worst_net_return
+```
+```{r}
+str(SP500)
+head(SP500)
+```
+
+## The worst daily log return in the S&P 500 sample is −0.2280063, corresponding to a net return of approximately −20.39%. This extreme loss is associated with the Black Monday stock-market crash on October 19, 1987. The event illustrates that financial markets can experience exceptionally large daily losses.
+
+
+## (b) Standardise this return with the sample mean and standard deviation. Under a normal model, what is the probability of a day at least this bad? How many years would one wait, on average, for such a day (252 trading days per year)?
+
+```{r}
+mu <- mean(sp500_returns)
+sigma <- sd(sp500_returns)
+
+mu
+sigma
+```
+```{r}
+z_worst <- (worst_log_return - mu) / sigma
+z_worst
+```
+
+```{r}
+p_normal <- pnorm(z_worst)
+p_normal
+```
+```{r}
+wait_days <- 1 / p_normal
+wait_years <- wait_days / 252
+
+wait_days
+wait_years
+```
+
+## The worst observed daily log return was standardized using the sample mean and standard deviation. Under the normality assumption, the estimated probability of observing a return this low or lower is approximately \(1.83\times10^{-98}\). This implies an expected waiting time of approximately \(2.17\times10^{95}\) years, which is unrealistic for practical financial risk assessment. The result suggests that the normal model may substantially underestimate the likelihood of extreme market losses.
+
+
+## (c) Count the days whose standardised return exceeds 3, 4 and 5 in absolute value. Compare each count with the number expected under normality in a table. 
+
+```{r}
+z_returns <- (sp500_returns - mu) / sigma
+
+head(z_returns)
+```
+```{r}
+count_3 <- sum(abs(z_returns) > 3)
+count_4 <- sum(abs(z_returns) > 4)
+count_5 <- sum(abs(z_returns) > 5)
+
+count_3
+count_4
+count_5
+```
+
+```{r}
+n <- length(z_returns)
+
+p_3 <- 2 * pnorm(-3)
+p_4 <- 2 * pnorm(-4)
+p_5 <- 2 * pnorm(-5)
+
+expected_3 <- n * p_3
+expected_4 <- n * p_4
+expected_5 <- n * p_5
+
+expected_3
+expected_4
+expected_5
+```
+
+```{r}
+comparison <- data.frame(
+  Threshold = c(3, 4, 5),
+  Observed = c(count_3, count_4, count_5),
+  Normal_Probability = c(p_3, p_4, p_5),
+  Expected = c(expected_3, expected_4, expected_5)
+)
+
+comparison
+```
+
+
+## (d) Repeat question (b) with a t-distribution with 4 degrees of freedom, rescaled to have variance 1. Compare the waiting times.
+
+
+```{r}
+df <- 4
+
+p_t4 <- pt(z_worst * sqrt(df / (df - 2)), df = df)
+
+p_t4
+```
+
+```{r}
+p_normal
+p_t4
+```
+
+## Using a Student's t-distribution with 4 degrees of freedom, rescaled to have variance one, gives a tail probability of approximately \(3.81\times10^{-6}\) for the worst observed standardized return. This probability is substantially larger than the probability under the normal model, approximately \(1.83\times10^{-98}\). The result illustrates that the Student's t-distribution assigns much more probability to extreme returns because of its heavier tails. Therefore, it may provide a more appropriate model for extreme financial returns than the normal distribution, although further model assessment is needed.
+
+## (e) Draw a normal QQ plot of the returns and describe where the data leave the line.
+
+
+```{r}
+qqnorm(
+  sp500_returns,
+  main = "Normal QQ Plot of S&P 500 Daily Log Returns",
+  xlab = "Theoretical Normal Quantiles",
+  ylab = "Observed Return Quantiles"
+)
+
+qqline(sp500_returns, col = "red", lwd = 2)
+```
+## The normal QQ plot shows that most observations in the central part of the distribution lie relatively close to the reference line. However, substantial deviations occur in both tails, particularly in the left tail, where extreme negative returns fall far below the line. This indicates that the empirical distribution has more extreme observations than would be expected under a normal distribution. The QQ plot supports the earlier findings that the normal model underestimates extreme financial returns and may be inadequate for assessing tail risk.
+
+
+# Exercise 3. Variances are not constant; measuring risk (CRSPday)
+
+
+## (a) For each of the four series and each year, compute the annualised volatility (standard deviation times √252). Present it as a table and plot it against the year. Is volatility constant over time? Which asset is the most volatile?
+
+
+```{r}
+data("CRSPday", package = "Ecdat")
+
+# Inspect the dataset
+?CRSPday
+str(CRSPday)
+head(CRSPday)
+summary(CRSPday)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Convert the dataset to a data frame
+crsp_df <- as.data.frame(CRSPday)
+
+# Calculate annualized volatility for each asset and year
+volatility_table <- crsp_df %>%
+  group_by(year) %>%
+  summarise(
+    GE = sd(ge, na.rm = TRUE) * sqrt(252),
+    IBM = sd(ibm, na.rm = TRUE) * sqrt(252),
+    Mobil = sd(mobil, na.rm = TRUE) * sqrt(252),
+    CRSP = sd(crsp, na.rm = TRUE) * sqrt(252),
+    .groups = "drop"
+  )
+
+volatility_table
+```
+
+```{r}
+
+volatility_long <- volatility_table %>%
+  pivot_longer(
+    cols = c(GE, IBM, Mobil, CRSP),
+    names_to = "Asset",
+    values_to = "Annualized_Volatility"
+  )
+
+ggplot(
+  volatility_long,
+  aes(x = year, y = Annualized_Volatility, color = Asset)
+) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  labs(
+    title = "Annualized Volatility by Year",
+    x = "Year",
+    y = "Annualized Volatility",
+    color = "Asset"
+  ) +
+  theme_minimal()
+
+```
+## # Conclusion:
+### Annualized volatility is not constant over time.
+### All four assets show changes in volatility across the years.
+### IBM is the most volatile asset overall, reaching approximately
+### 35.4% annualized volatility in 1997.
+### The CRSP market index generally has lower volatility than
+### the individual stocks.
+
+## (b) Plot the autocorrelation function of the IBM returns and of the squared IBM returns. What do you conclude about independence and about volatility clustering?
+
+```{r}
+ibm_returns <- crsp_df$ibm
+
+acf(ibm_returns,
+    main = "ACF of IBM Daily Returns")
+```
+```{r}
+ibm_squared <- ibm_returns^2
+
+acf(ibm_squared,
+    main = "ACF of Squared IBM Daily Returns")
+```
+## Conclusion:
+### The ACF of IBM daily returns shows little linear autocorrelation
+### at most nonzero lags, suggesting limited linear dependence.
+### The ACF of squared IBM returns shows positive autocorrelation
+### at some short lags, indicating volatility clustering.
+### Therefore, returns may be weakly autocorrelated while their
+### squared values remain dependent over time.
+
+##(c) An investor holds $1,000,000 of IBM for one day. Compute the 99% value-at-risk and expected shortfall of the loss in two ways: from the historical returns, and from a normal distribution with the sample mean and standard deviation. Which method gives the larger risk, and why?
+
+```{r}
+
+# Investment amount
+investment <- 1000000
+
+# IBM daily returns
+ibm_returns <- crsp_df$ibm
+
+# Daily losses
+ibm_losses <- -investment * ibm_returns
+
+# Historical 99% VaR
+VaR_hist <- quantile(
+  ibm_losses,
+  probs = 0.99,
+  na.rm = TRUE
+)
+
+VaR_hist
+
+```
+
+```{r}
+
+# Historical 99% Expected Shortfall
+ES_hist <- mean(
+  ibm_losses[ibm_losses >= VaR_hist],
+  na.rm = TRUE
+)
+
+ES_hist
+
+```
+
+```{r}
+
+# Sample mean and standard deviation of IBM returns
+mu <- mean(ibm_returns, na.rm = TRUE)
+sigma <- sd(ibm_returns, na.rm = TRUE)
+
+# 99% normal VaR
+z_99 <- qnorm(0.99)
+
+VaR_normal <- investment * (-mu + z_99 * sigma)
+
+VaR_normal
+
+```
+```{r}
+
+# 99% normal Expected Shortfall
+ES_normal <- investment * (
+  -mu + sigma * dnorm(z_99) / (1 - 0.99)
+)
+
+ES_normal
+
+```
+
+## Conclusion:
+### The historical 99% VaR and ES are higher than those
+### estimated under the normal distribution.
+### The historical method therefore indicates greater
+### one-day downside risk for this IBM position.
+### The difference is especially large for Expected Shortfall,
+### suggesting more severe observed losses in the extreme tail
+### than the normal model estimates.
