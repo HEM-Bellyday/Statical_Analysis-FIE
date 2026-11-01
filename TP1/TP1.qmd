@@ -2,7 +2,6 @@
 
 ## (a) Plot the four indices. Describe the general trend of each and the period where they move the most.
 
-
 ```{r}
 # Load the dataset
 data("EuStockMarkets", package = "datasets")
@@ -15,8 +14,8 @@ str(EuStockMarkets)
 plot(EuStockMarkets)
 
 ```
-## **Interpretation:** All four European stock market indices exhibit an overall upward trend during the sample period from 1991 to 1998. The upward movements appear more pronounced from around 1996 onward. However, the magnitude and timing of fluctuations differ between indices. Further inspection of the plots is needed to identify the periods with the largest movements precisely.
 
+## **Interpretation:** All four European stock market indices exhibit an overall upward trend during the sample period from 1991 to 1998. The upward movements appear more pronounced from around 1996 onward. However, the magnitude and timing of fluctuations differ between indices. Further inspection of the plots is needed to identify the periods with the largest movements precisely.
 
 ```{r}
 
@@ -34,6 +33,7 @@ largest_increase
 ```
 
 ˆ
+
 ```{r}
 
 # Find the observation where each index has its largest increase
@@ -52,12 +52,14 @@ for (i in seq_along(largest_increase_position)) {
 }
 
 ```
+
 ```{r}
 j <- which.max(changes[, "SMI"])
 
 indices[j:(j + 1), "SMI"]
 
 ```
+
 ```{r}
 
 # Starting values of the four indices
@@ -72,6 +74,7 @@ total_increase <- end_values - start_values
 total_increase
 
 ```
+
 ```{r}
 
 # Percentage increase over the whole period
@@ -81,9 +84,7 @@ round(percentage_increase, 2)
 
 ```
 
-
 ## **(a) General trends and largest movements** The four European stock market indices generally exhibit an upward trend over the period 1991–1998, although their trajectories differ. The SMI has the largest single-observation increase, rising from 7,401.4 to 7,640.8, a gain of 239.4 index points. The largest single-observation increases for the DAX, CAC, and FTSE are 160.97, 166.70, and 160.80 points, respectively.
-
 
 ## (b) Compute the daily log returns of the four indices. Draw a scatter-plot matrix and compute the correlation matrix. Which two markets are the most correlated, and which market is the least correlated with the others?
 
@@ -113,8 +114,8 @@ cor(EuStockMarkets)
 # Correlation of daily log returns
 cor(log_returns)
 ```
-## **Conclusion:** All four European stock market indices have positive correlations in their daily log returns. The strongest correlation is between DAX and CAC (0.734), while the weakest is between SMI and FTSE (0.585). These results indicate that the markets tend to move together, although their daily returns are not perfectly aligned.
 
+## **Conclusion:** All four European stock market indices have positive correlations in their daily log returns. The strongest correlation is between DAX and CAC (0.734), while the weakest is between SMI and FTSE (0.585). These results indicate that the markets tend to move together, although their daily returns are not perfectly aligned.
 
 ## For each index, nd the worst daily log return and the date on which it occurred. Do several markets share the same worst day? What event could explain it?
 
@@ -143,9 +144,7 @@ log_returns[35, ]
 
 ## **Interpretation:** The DAX, SMI, and CAC indices experienced their worst daily log returns at observation 35, with values of −0.0963, −0.0838, and −0.0758, respectively. The FTSE experienced a negative log return of −0.0312 at the same observation, but its worst daily return occurred later, at observation 330. All four indices declined at observation 35, suggesting that a common market shock may have affected the four markets, although the magnitude of the decline differed. However, the returns alone cannot identify the cause of this event. Further historical investigation is needed to determine whether a specific event explains the simultaneous declines.
 
-
 ## (D) An investor bought the DAX and sold the FTSE short on the rst day. Using log returns only, plot the log of the ratio of the two investments over time. Did the DAX outperform the FTSE over the period?
-
 
 ```{r}
 
@@ -173,7 +172,8 @@ plot(
 abline(h = 0, lty = 2, col = "red")
 
 ```
-## ### Conclusion
+
+## \### Conclusion
 
 ## The purpose of this strategy is to investigate whether the German stock market (DAX) outperforms the UK stock market (FTSE) over time. We take a **long position in DAX** because we expect it to perform better, and a **short position in FTSE** to benefit from its underperformance relative to DAX. By comparing their daily log returns, we can evaluate their relative performance without directly comparing their different index levels.
 
@@ -185,7 +185,6 @@ abline(h = 0, lty = 2, col = "red")
 
 ## (a) Find the worst day in the sample. Give its log return and its net return, and identify the date.
 
-
 ```{r}
 data("SP500", package = "Ecdat")
 
@@ -193,6 +192,7 @@ head(SP500)
 str(SP500)
 summary(SP500)
 ```
+
 ```{r}
 sp500_returns <- as.numeric(SP500[, 1])
 
@@ -205,13 +205,13 @@ worst_index
 worst_log_return
 worst_net_return
 ```
+
 ```{r}
 str(SP500)
 head(SP500)
 ```
 
 ## The worst daily log return in the S&P 500 sample is −0.2280063, corresponding to a net return of approximately −20.39%. This extreme loss is associated with the Black Monday stock-market crash on October 19, 1987. The event illustrates that financial markets can experience exceptionally large daily losses.
-
 
 ## (b) Standardise this return with the sample mean and standard deviation. Under a normal model, what is the probability of a day at least this bad? How many years would one wait, on average, for such a day (252 trading days per year)?
 
@@ -222,6 +222,7 @@ sigma <- sd(sp500_returns)
 mu
 sigma
 ```
+
 ```{r}
 z_worst <- (worst_log_return - mu) / sigma
 z_worst
@@ -231,6 +232,7 @@ z_worst
 p_normal <- pnorm(z_worst)
 p_normal
 ```
+
 ```{r}
 wait_days <- 1 / p_normal
 wait_years <- wait_days / 252
@@ -239,16 +241,16 @@ wait_days
 wait_years
 ```
 
-## The worst observed daily log return was standardized using the sample mean and standard deviation. Under the normality assumption, the estimated probability of observing a return this low or lower is approximately \(1.83\times10^{-98}\). This implies an expected waiting time of approximately \(2.17\times10^{95}\) years, which is unrealistic for practical financial risk assessment. The result suggests that the normal model may substantially underestimate the likelihood of extreme market losses.
+## The worst observed daily log return was standardized using the sample mean and standard deviation. Under the normality assumption, the estimated probability of observing a return this low or lower is approximately (1.83\times10\^{-98}). This implies an expected waiting time of approximately (2.17\times10\^{95}) years, which is unrealistic for practical financial risk assessment. The result suggests that the normal model may substantially underestimate the likelihood of extreme market losses.
 
-
-## (c) Count the days whose standardised return exceeds 3, 4 and 5 in absolute value. Compare each count with the number expected under normality in a table. 
+## (c) Count the days whose standardised return exceeds 3, 4 and 5 in absolute value. Compare each count with the number expected under normality in a table.
 
 ```{r}
 z_returns <- (sp500_returns - mu) / sigma
 
 head(z_returns)
 ```
+
 ```{r}
 count_3 <- sum(abs(z_returns) > 3)
 count_4 <- sum(abs(z_returns) > 4)
@@ -286,9 +288,7 @@ comparison <- data.frame(
 comparison
 ```
 
-
 ## (d) Repeat question (b) with a t-distribution with 4 degrees of freedom, rescaled to have variance 1. Compare the waiting times.
-
 
 ```{r}
 df <- 4
@@ -303,10 +303,9 @@ p_normal
 p_t4
 ```
 
-## Using a Student's t-distribution with 4 degrees of freedom, rescaled to have variance one, gives a tail probability of approximately \(3.81\times10^{-6}\) for the worst observed standardized return. This probability is substantially larger than the probability under the normal model, approximately \(1.83\times10^{-98}\). The result illustrates that the Student's t-distribution assigns much more probability to extreme returns because of its heavier tails. Therefore, it may provide a more appropriate model for extreme financial returns than the normal distribution, although further model assessment is needed.
+## Using a Student's t-distribution with 4 degrees of freedom, rescaled to have variance one, gives a tail probability of approximately (3.81\times10\^{-6}) for the worst observed standardized return. This probability is substantially larger than the probability under the normal model, approximately (1.83\times10\^{-98}). The result illustrates that the Student's t-distribution assigns much more probability to extreme returns because of its heavier tails. Therefore, it may provide a more appropriate model for extreme financial returns than the normal distribution, although further model assessment is needed.
 
 ## (e) Draw a normal QQ plot of the returns and describe where the data leave the line.
-
 
 ```{r}
 qqnorm(
@@ -318,14 +317,12 @@ qqnorm(
 
 qqline(sp500_returns, col = "red", lwd = 2)
 ```
-## The normal QQ plot shows that most observations in the central part of the distribution lie relatively close to the reference line. However, substantial deviations occur in both tails, particularly in the left tail, where extreme negative returns fall far below the line. This indicates that the empirical distribution has more extreme observations than would be expected under a normal distribution. The QQ plot supports the earlier findings that the normal model underestimates extreme financial returns and may be inadequate for assessing tail risk.
 
+## The normal QQ plot shows that most observations in the central part of the distribution lie relatively close to the reference line. However, substantial deviations occur in both tails, particularly in the left tail, where extreme negative returns fall far below the line. This indicates that the empirical distribution has more extreme observations than would be expected under a normal distribution. The QQ plot supports the earlier findings that the normal model underestimates extreme financial returns and may be inadequate for assessing tail risk.
 
 # Exercise 3. Variances are not constant; measuring risk (CRSPday)
 
-
 ## (a) For each of the four series and each year, compute the annualised volatility (standard deviation times √252). Present it as a table and plot it against the year. Is volatility constant over time? Which asset is the most volatile?
-
 
 ```{r}
 data("CRSPday", package = "Ecdat")
@@ -383,12 +380,19 @@ ggplot(
   theme_minimal()
 
 ```
-## # Conclusion:
+
+## \# Conclusion:
+
 ### Annualized volatility is not constant over time.
+
 ### All four assets show changes in volatility across the years.
+
 ### IBM is the most volatile asset overall, reaching approximately
+
 ### 35.4% annualized volatility in 1997.
+
 ### The CRSP market index generally has lower volatility than
+
 ### the individual stocks.
 
 ## (b) Plot the autocorrelation function of the IBM returns and of the squared IBM returns. What do you conclude about independence and about volatility clustering?
@@ -399,21 +403,29 @@ ibm_returns <- crsp_df$ibm
 acf(ibm_returns,
     main = "ACF of IBM Daily Returns")
 ```
+
 ```{r}
 ibm_squared <- ibm_returns^2
 
 acf(ibm_squared,
     main = "ACF of Squared IBM Daily Returns")
 ```
+
 ## Conclusion:
+
 ### The ACF of IBM daily returns shows little linear autocorrelation
+
 ### at most nonzero lags, suggesting limited linear dependence.
+
 ### The ACF of squared IBM returns shows positive autocorrelation
+
 ### at some short lags, indicating volatility clustering.
+
 ### Therefore, returns may be weakly autocorrelated while their
+
 ### squared values remain dependent over time.
 
-##(c) An investor holds $1,000,000 of IBM for one day. Compute the 99% value-at-risk and expected shortfall of the loss in two ways: from the historical returns, and from a normal distribution with the sample mean and standard deviation. Which method gives the larger risk, and why?
+##(c) An investor holds \$1,000,000 of IBM for one day. Compute the 99% value-at-risk and expected shortfall of the loss in two ways: from the historical returns, and from a normal distribution with the sample mean and standard deviation. Which method gives the larger risk, and why?
 
 ```{r}
 
@@ -463,6 +475,7 @@ VaR_normal <- investment * (-mu + z_99 * sigma)
 VaR_normal
 
 ```
+
 ```{r}
 
 # 99% normal Expected Shortfall
@@ -475,10 +488,390 @@ ES_normal
 ```
 
 ## Conclusion:
+
 ### The historical 99% VaR and ES are higher than those
+
 ### estimated under the normal distribution.
+
 ### The historical method therefore indicates greater
+
 ### one-day downside risk for this IBM position.
+
 ### The difference is especially large for Expected Shortfall,
+
 ### suggesting more severe observed losses in the extreme tail
+
 ### than the normal model estimates.
+
+
+
+
+
+# Exercise 4. Net, gross, log and multi-period returns (CRSPday and Garch)
+## (a) Convert the net returns of the four series to log returns. What is the largest absolute dierence between the two for each series? Is the approximation log(1 + R) ≈R good for daily data?
+
+```{r}
+# Load library
+library(Ecdat)
+
+# Load dataset
+data("CRSPday")
+
+# Inspect dataset
+str(CRSPday)
+head(CRSPday)
+summary(CRSPday)
+
+# Documentation
+?CRSPday
+```
+```{r}
+# Extract the four net return series
+net_returns <- CRSPday[, c("ge", "ibm", "mobil", "crsp")]
+
+# Convert net returns to log returns
+log_returns <- log(1 + net_returns)
+
+# Display first 6 observations
+head(log_returns)
+```
+
+```{r}
+# Calculate absolute differences
+differences <- abs(net_returns - log_returns)
+
+# Find maximum absolute difference for each asset
+max_diff <- apply(differences, 2, max, na.rm = TRUE)
+
+# Display results
+print(max_diff)
+```
+
+```{r}
+# Calculate average absolute difference too
+mean_diff <- apply(differences, 2, mean, na.rm = TRUE)
+
+# Create results table
+results_a <- data.frame(
+  Asset = names(max_diff),
+  Max_Difference = as.numeric(max_diff),
+  Mean_Difference = as.numeric(mean_diff)
+)
+
+print(results_a)
+```
+## The empirical results show that the absolute differences between net returns and log returns are relatively small across all four assets. The mean absolute differences range from approximately 0.0000304 to 0.0001525. This suggests that the approximation \(\ln(1+R_t)\approx R_t\) is reasonable for daily financial returns. However, the maximum differences indicate that the approximation becomes less accurate during days with relatively large returns.
+
+
+## (b) Build the wealth of $1 invested in each asset on the rst day, using gross returns. Plot the four wealth paths on a log scale and give the nal wealth of each.
+
+```{r}
+# Calculate gross returns
+gross_returns <- 1 + net_returns
+
+head(gross_returns)
+```
+```{r}
+# Initial investment
+initial_wealth <- 1
+
+# Calculate wealth using cumulative product
+wealth <- apply(
+  gross_returns,
+  2,
+  cumprod
+)
+
+# Convert to data frame
+wealth <- as.data.frame(wealth)
+
+# Display first observations
+head(wealth)
+```
+
+```{r}
+# Plot wealth paths
+matplot(
+  wealth,
+  type = "l",
+  lty = 1,
+  col = c("blue", "red", "green", "orange"),
+  log = "y",
+  xlab = "Trading Days",
+  ylab = "Wealth ($)",
+  main = "Wealth Evolution of Four Assets"
+)
+
+legend(
+  "topleft",
+  legend = colnames(wealth),
+  col = c("blue", "red", "green", "orange"),
+  lty = 1
+)
+```
+```{r}
+# Final wealth for each asset
+final_wealth <- wealth[nrow(wealth), ]
+
+print(final_wealth)
+```
+
+## The wealth paths show different investment performances over the sample period. GE achieved the highest cumulative wealth, while IBM experienced a substantial decline during the middle of the sample before recovering. Mobil and CRSP displayed relatively smoother upward trajectories. The results illustrate how daily returns compound over time and how different assets exhibit different investment performance and risk characteristics.
+## The accumulated wealth analysis indicates that GE achieved the highest final wealth of approximately $11.82 from an initial investment of $1. IBM achieved the lowest final wealth of approximately $3.99. Mobil and CRSP reached approximately $5.80 and $5.15, respectively. The wealth paths demonstrate the effect of daily compounding and highlight differences in investment performance over time.
+
+## (c) For GE, compute the monthly returns in two ways: as the product of daily gross returns, and as the sum of daily log returns. Check numerically that the two give the same monthly log return.
+
+```{r}
+# Convert time-series matrix into data frame
+CRSP_df <- as.data.frame(CRSPday)
+
+# Check structure
+str(CRSP_df)
+
+# Inspect
+head(CRSP_df)
+```
+```{r}
+# Extract GE daily returns
+ge_data <- data.frame(
+  year = CRSP_df$year,
+  month = CRSP_df$month,
+  net_return = CRSP_df$ge
+)
+
+# Calculate gross returns
+ge_data$gross_return <- 1 + ge_data$net_return
+
+# Calculate daily log returns
+ge_data$log_return <- log(ge_data$gross_return)
+
+
+# METHOD 1: Product of daily gross returns
+monthly_gross <- aggregate(
+  gross_return ~ year + month,
+  data = ge_data,
+  FUN = prod
+)
+
+# Convert to monthly log returns
+monthly_gross$log_from_product <-
+  log(monthly_gross$gross_return)
+
+
+# METHOD 2: Sum of daily log returns
+monthly_log <- aggregate(
+  log_return ~ year + month,
+  data = ge_data,
+  FUN = sum
+)
+
+
+# COMPARE BOTH METHODS
+comparison <- merge(
+  monthly_gross,
+  monthly_log,
+  by = c("year", "month")
+)
+
+comparison$difference <- abs(
+  comparison$log_from_product -
+  comparison$log_return
+)
+
+# Display results
+head(comparison)
+
+# Maximum numerical difference
+max(comparison$difference)
+```
+## The monthly log returns calculated using the product of daily gross returns and the sum of daily log returns are numerically identical. The maximum difference is approximately zero, with negligible discrepancies caused by floating-point precision. This confirms the additive property of log returns, where the logarithm of a product equals the sum of logarithms.
+
+
+## (d) Under the random walk model, the monthly log return has mean kµ and variance kσ2, where k is the number of trading days in the month. Compare the sample mean and variance of the monthly log returns with these values. Comment on any dierence.
+
+
+```{r}
+# Daily GE log returns
+mu <- mean(ge_data$log_return, na.rm = TRUE)
+
+sigma2 <- var(ge_data$log_return, na.rm = TRUE)
+
+sigma <- sd(ge_data$log_return, na.rm = TRUE)
+
+cat("Daily mean:", mu, "\n")
+cat("Daily variance:", sigma2, "\n")
+cat("Daily standard deviation:", sigma, "\n")
+```
+
+```{r}
+# Count daily observations in each month
+monthly_days <- aggregate(
+  log_return ~ year + month,
+  data = ge_data,
+  FUN = length
+)
+
+names(monthly_days)[3] <- "k"
+
+head(monthly_days)
+```
+```{r}
+# Average number of trading days
+k_avg <- mean(monthly_days$k)
+
+# Theoretical monthly mean
+theoretical_mean <- k_avg * mu
+
+# Theoretical monthly variance
+theoretical_variance <- k_avg * sigma2
+
+cat("Average trading days:", k_avg, "\n")
+cat("Theoretical monthly mean:", theoretical_mean, "\n")
+cat("Theoretical monthly variance:", theoretical_variance, "\n")
+```
+
+```{r}
+# Sample statistics from actual monthly log returns
+observed_mean <- mean(monthly_log$log_return)
+
+observed_variance <- var(monthly_log$log_return)
+
+cat("Observed monthly mean:", observed_mean, "\n")
+cat("Observed monthly variance:", observed_variance, "\n")
+```
+```{r}
+comparison_d <- data.frame(
+  Statistic = c("Mean", "Variance"),
+
+  Theoretical = c(
+    theoretical_mean,
+    theoretical_variance
+  ),
+
+  Observed = c(
+    observed_mean,
+    observed_variance
+  )
+)
+
+comparison_d$Difference <-
+  comparison_d$Observed - comparison_d$Theoretical
+
+print(comparison_d)
+```
+
+```{r}
+# Autocorrelation test
+Box.test(
+  ge_data$log_return,
+  lag = 10,
+  type = "Ljung-Box"
+)
+```
+
+```{r}
+# Calculate theoretical monthly variance for each month
+monthly_days$theoretical_variance <-
+  monthly_days$k * sigma2
+
+# Calculate observed monthly variance
+monthly_observed <- var(monthly_log$log_return)
+
+# Average theoretical monthly variance
+average_theoretical_variance <-
+  mean(monthly_days$theoretical_variance)
+
+comparison_variance <- data.frame(
+  Theoretical = average_theoretical_variance,
+  Observed = monthly_observed
+)
+
+print(comparison_variance)
+```
+## The Ljung–Box test produces a p-value of 0.009851, which is below the 5% significance level. Therefore, the null hypothesis of no autocorrelation up to lag 10 is rejected. This suggests that the independence assumption of the random walk model may not fully hold for GE daily log returns. Such dependence may contribute to differences between theoretical and observed monthly variances.
+
+## (e) Compute the yearly net return of GE for each year. Which year was best and which was worst?
+
+```{r}
+# Calculate yearly gross returns
+yearly_gross <- aggregate(
+  gross_return ~ year,
+  data = ge_data,
+  FUN = prod
+)
+
+# Convert gross returns to net returns
+yearly_gross$yearly_net_return <-
+  yearly_gross$gross_return - 1
+
+# Display yearly returns
+print(yearly_gross)
+```
+
+```{r}
+# Best year
+best_year <- yearly_gross[
+  which.max(yearly_gross$yearly_net_return),
+]
+
+# Worst year
+worst_year <- yearly_gross[
+  which.min(yearly_gross$yearly_net_return),
+]
+
+print(best_year)
+print(worst_year)
+```
+
+## (f) In the Garch data set, the column dm is the price of one German mark in dollars. Its inverse is the price of one dollar in marks. Compute the daily net returns and the daily log returns of both series. Show that log returns change sign exactly when the quotation
+
+```{r}
+library(Ecdat)
+
+data("Garch")
+
+str(Garch)
+head(Garch)
+?Garch
+```
+```{r}
+# Original quotation
+P <- Garch$dm
+
+# Inverse quotation
+Q <- 1 / P
+```
+```{r}
+Garch_df <- as.data.frame(Garch)
+
+P <- Garch_df$dm
+Q <- 1 / P
+```
+```{r}
+# Net returns
+net_original <- P[-1] / P[-length(P)] - 1
+
+net_inverse <- Q[-1] / Q[-length(Q)] - 1
+
+# Log returns
+log_original <- diff(log(P))
+
+log_inverse <- diff(log(Q))
+```
+```{r}
+# Compare original and inverse log returns
+log_difference <- max(
+  abs(log_original + log_inverse),
+  na.rm = TRUE
+)
+
+# Compare original and inverse net returns
+net_difference <- max(
+  abs(net_inverse + net_original),
+  na.rm = TRUE
+)
+
+cat("Log return difference:", log_difference, "\n")
+cat("Net return difference:", net_difference, "\n")
+```
+
