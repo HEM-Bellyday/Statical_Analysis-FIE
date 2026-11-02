@@ -875,3 +875,95 @@ cat("Log return difference:", log_difference, "\n")
 cat("Net return difference:", net_difference, "\n")
 ```
 
+
+# Exercise 5. Adjustment for dividends (quantmod, internet re-quired)
+## (a) Download the daily prices of Coca-Cola (KO) from 2015 to 2024 and its dividend history over the same period.
+
+```{r}
+# Install if necessary
+library(quantmod)
+
+# Download Coca-Cola daily stock prices
+getSymbols("KO",
+           src = "yahoo",
+           from = "2015-01-01",
+           to = "2025-01-01")
+
+# Download dividend history
+dividends <- getDividends("KO",
+                          from = "2015-01-01",
+                          to = "2024-12-31",
+                          auto.assign = FALSE)
+
+# Extract closing and adjusted closing prices
+close_price <- Cl(KO)
+adjusted_price <- Ad(KO)
+
+# Inspect the data
+head(KO)
+head(dividends)
+head(close_price)
+head(adjusted_price)
+```
+
+## (b) Compute the return over the whole period in three ways: from the closing prices only, from the closing prices plus dividends using 1 + Rt = (Pt + Dt)/Pt−1, and from the adjusted closing prices.
+
+```{r}
+# Initial and final closing prices
+P_start <- as.numeric(first(close_price))
+P_end   <- as.numeric(last(close_price))
+
+# Calculate price return
+return_price <- (P_end / P_start) - 1
+
+return_price
+```
+```{r}
+data <- merge(close_price, dividends, join = "left")
+
+colnames(data) <- c("price", "dividend")
+
+data$dividend[is.na(data$dividend)] <- 0
+price_vec <- as.numeric(data$price)
+div_vec   <- as.numeric(data$dividend)
+
+gross_returns <- (price_vec[-1] + div_vec[-1]) /
+                 price_vec[-length(price_vec)]
+
+return_dividend <- prod(gross_returns) - 1
+
+return_dividend
+```
+
+```{r}
+P_adj_start <- as.numeric(first(adjusted_price))
+P_adj_end   <- as.numeric(last(adjusted_price))
+
+return_adjusted <- (P_adj_end / P_adj_start) - 1
+
+return_adjusted
+```
+## c) How much of the total return comes from dividends? Is the adjusted-price return close to your dividend-adjusted return? Explain any remaining dierence.
+
+```{r}
+results <- c(
+  Price_Return = return_price,
+  Dividend_Return = return_dividend,
+  Adjusted_Return = return_adjusted
+)
+
+round(results * 100, 2)
+```
+
+```{r}
+dividend_contribution <- return_dividend - return_price
+
+dividend_contribution * 100
+```
+
+```{r}
+difference <- return_adjusted - return_dividend
+
+difference * 100
+```
+## The closing-price-only method gives a total return of 47.75%, while including dividends increases the total return to 103.01%. The difference is approximately 55.26 percentage points, showing the important contribution of dividends to the overall investment return. The adjusted closing-price method gives a return of 103.05%, which is very close to the dividend-inclusive return. The small difference of approximately 0.04 percentage points may result from differences in dividend adjustment conventions and calculation methods. Therefore, considering dividends is important when measuring the total performance of an investment, because price changes alone can substantially underestimate the investor's return.
