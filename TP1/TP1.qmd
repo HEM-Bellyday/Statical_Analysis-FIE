@@ -967,3 +967,490 @@ difference <- return_adjusted - return_dividend
 difference * 100
 ```
 ## The closing-price-only method gives a total return of 47.75%, while including dividends increases the total return to 103.01%. The difference is approximately 55.26 percentage points, showing the important contribution of dividends to the overall investment return. The adjusted closing-price method gives a return of 103.05%, which is very close to the dividend-inclusive return. The small difference of approximately 0.04 percentage points may result from differences in dividend adjustment conventions and calculation methods. Therefore, considering dividends is important when measuring the total performance of an investment, because price changes alone can substantially underestimate the investor's return.
+
+
+
+#Exercise 6. Geometric random walk (EuStockMarkets)
+## a) Estimate the mean µ and standard deviation σ of the DAX daily log returns.
+
+```{r}
+
+# Exercise 6(a): Estimate mu and sigma
+
+# Load historical DAX data
+data("EuStockMarkets")
+
+# Extract DAX prices
+dax <- EuStockMarkets[, "DAX"]
+
+# Calculate daily log returns
+dax_returns <- diff(log(dax))
+
+# Estimate parameters
+mu <- mean(dax_returns)
+sigma <- sd(dax_returns)
+
+# Display results
+cat("Mean daily log return (mu):", mu, "\n")
+cat("Daily volatility (sigma):", sigma, "\n")
+
+
+```
+
+## (b) Starting from the rst DAX value, simulate 1000 paths of a lognormal geometric random walk with these parameters, of the same length as the data. Plot 50 simulated paths together with the real DAX.
+
+
+```{r}
+
+# Exercise 6(b): Simulate 1000 geometric random walks
+
+set.seed(123)
+
+n <- length(dax)
+n_sim <- 1000
+
+# Simulate daily log returns
+sim_returns <- matrix(
+  rnorm(n_sim * (n - 1), mean = mu, sd = sigma),
+  nrow = n - 1,
+  ncol = n_sim
+)
+
+# Convert simulated returns into price paths
+sim_paths <- apply(sim_returns, 2, function(x) {
+  dax[1] * exp(c(0, cumsum(x)))
+})
+
+# Plot 50 simulated paths
+matplot(
+  sim_paths[, 1:50],
+  type = "l",
+  lty = 1,
+  col = rgb(0, 0, 1, alpha = 0.2),
+  xlab = "Trading days",
+  ylab = "DAX index value",
+  main = "Simulated Geometric Random Walks"
+)
+
+# Add real DAX
+lines(dax, col = "red", lwd = 2)
+
+legend(
+  "topleft",
+  legend = c("Simulated paths", "Real DAX"),
+  col = c("blue", "red"),
+  lty = 1,
+  lwd = c(1, 2)
+)
+
+```
+
+```{r}
+
+# Improved visualization
+
+matplot(
+  sim_paths[, 1:50],
+  type = "l",
+  lty = 1,
+  col = rgb(0.1, 0.3, 0.9, 0.2),
+  log = "y",
+  xlab = "Trading days",
+  ylab = "DAX index (log scale)",
+  main = "50 Simulated Paths vs Real DAX",
+  lwd = 1
+)
+
+lines(dax, col = "black", lwd = 2)
+
+legend(
+  "topleft",
+  legend = c("Simulated paths", "Real DAX"),
+  col = c("blue", "black"),
+  lty = 1,
+  lwd = c(1, 2),
+  bty = "n"
+)
+
+```
+## (c) What fraction of the simulated paths end above the real nal value of the DAX?
+
+```{r}
+
+# Exercise 6(c)
+
+real_final <- tail(dax, 1)
+
+simulated_final <- sim_paths[n, ]
+
+prob_above <- mean(simulated_final > real_final)
+
+cat("Real final DAX:", real_final, "\n")
+cat("Fraction above real DAX:", prob_above, "\n")
+cat("Percentage:", prob_above * 100, "%\n")
+
+```
+
+## (d) At several dates, compute the fraction of simulated paths whose log price lies within µt± σ√t of the starting log price. Compare with the theoretical value.
+
+```{r}
+
+# Exercise 6(d)
+
+# Selected trading days
+selected_days <- c(100, 500, 1000, 1500)
+
+# Theoretical probability
+theoretical <- pnorm(1) - pnorm(-1)
+
+# Store results
+results <- data.frame(
+  Day = selected_days,
+  Simulated = NA_real_,
+  Theoretical = theoretical
+)
+
+for (j in seq_along(selected_days)) {
+
+  t <- selected_days[j]
+
+  # Log prices across all simulated paths
+  log_prices <- log(sim_paths[t + 1, ])
+
+  # Expected log price
+  center <- log(dax[1]) + mu * t
+
+  # One-standard-deviation interval
+  lower <- center - sigma * sqrt(t)
+  upper <- center + sigma * sqrt(t)
+
+  # Fraction inside interval
+  results$Simulated[j] <- mean(
+    log_prices >= lower & log_prices <= upper
+  )
+}
+
+print(results)
+
+```
+## (e) Compare the autocorrelation of the squared returns of the real DAX and of one simulated path. Which feature of the real data does the model miss?
+
+```{r}
+
+
+# Exercise 6(e): Compare squared-return autocorrelation
+
+real_sq <- as.numeric(real_returns)^2
+sim_sq <- as.numeric(simulated_returns)^2
+
+par(mfrow = c(2, 1))
+
+acf(
+  real_sq,
+  lag.max = 30,
+  main = "Real DAX: Squared Returns",
+  xlab = "Trading days"
+)
+
+acf(
+  sim_sq,
+  lag.max = 30,
+  main = "Simulated DAX: Squared Returns",
+  xlab = "Trading days"
+)
+
+par(mfrow = c(1, 1))
+
+
+```
+### Exercise 6(e): Autocorrelation of Squared Returns
+
+###The autocorrelation functions of the squared real DAX returns and squared simulated returns are generally close to zero.
+
+###The simulated returns are generated independently from a normal distribution with constant mean and variance. Therefore, their squared returns are also expected to exhibit little autocorrelation.
+
+###The real DAX squared returns may exhibit some significant autocorrelation, indicating potential dependence in volatility.
+
+###The geometric random walk captures the basic price evolution but may fail to reproduce volatility clustering observed in financial markets.
+
+```{r}
+
+# Ljung-Box tests on squared returns
+
+Box.test(real_returns^2,
+         lag = 20,
+         type = "Ljung-Box")
+
+Box.test(simulated_returns^2,
+         lag = 20,
+         type = "Ljung-Box")
+
+```
+
+# Exercise 7. Leverage and Monte Carlo (CRSPday)
+
+## (a) Estimate µ and σ of the daily log returns of the CRSP index.
+
+```{r}
+
+# Exercise 7: Leverage and Monte Carlo
+
+# Install if necessary
+# install.packages("Ecdat")
+
+library(Ecdat)
+
+# Load CRSPday dataset
+data("CRSPday", package = "Ecdat")
+
+# Inspect the data
+str(CRSPday)
+
+# First observations
+head(CRSPday)
+
+# Summary statistics
+summary(CRSPday)
+
+# Dataset documentation
+help("CRSPday", package = "Ecdat")
+
+```
+```{r}
+
+# Exercise 7(a): Estimate CRSP parameters
+
+# Extract CRSP daily net returns
+crsp_net <- CRSPday[, "crsp"]
+
+# Convert net returns to log returns
+crsp_log <- log(1 + crsp_net)
+
+# Estimate mean and standard deviation
+mu_crsp <- mean(crsp_log)
+sigma_crsp <- sd(crsp_log)
+
+# Display results
+cat("Observations:", length(crsp_log), "\n")
+cat("Mean daily log return:", mu_crsp, "\n")
+cat("Daily volatility:", sigma_crsp, "\n")
+
+# Express as percentages
+cat("Mean (%):", mu_crsp * 100, "%\n")
+cat("Volatility (%):", sigma_crsp * 100, "%\n")
+
+```
+
+## (b) By simulation (10,000 paths, 45 trading days), estimate the probability that the position closes below $950,000 at least once. Do it twice: with normal log returns, and by resampling the historical log returns with replacement (bootstrap)
+
+```{r}
+
+# Exercise 7(b): Leverage and Monte Carlo
+
+set.seed(123)
+
+# Simulation settings
+n_sim <- 10000
+n_days <- 45
+
+initial_value <- 1000000
+debt <- 950000
+
+# Method 1: Normal simulation
+normal_returns <- matrix(
+  rnorm(
+    n_sim * n_days,
+    mean = mu_crsp,
+    sd = sigma_crsp
+  ),
+  nrow = n_days,
+  ncol = n_sim
+)
+
+normal_paths <- initial_value * exp(
+  apply(normal_returns, 2, cumsum)
+)
+
+# Check whether each path crosses the threshold
+normal_breach <- apply(
+  normal_paths < debt,
+  2,
+  any
+)
+
+prob_normal <- mean(normal_breach)
+
+# Method 2: Historical bootstrap
+bootstrap_returns <- matrix(
+  sample(
+    crsp_log,
+    n_sim * n_days,
+    replace = TRUE
+  ),
+  nrow = n_days,
+  ncol = n_sim
+)
+
+bootstrap_paths <- initial_value * exp(
+  apply(bootstrap_returns, 2, cumsum)
+)
+
+bootstrap_breach <- apply(
+  bootstrap_paths < debt,
+  2,
+  any
+)
+
+prob_bootstrap <- mean(bootstrap_breach)
+
+# Compare results
+results_7b <- data.frame(
+  Method = c("Normal", "Bootstrap"),
+  Probability = c(prob_normal, prob_bootstrap),
+  Percentage = c(prob_normal, prob_bootstrap) * 100
+)
+
+print(results_7b)
+
+```
+## (c) The fund now sells at the rst close above $1,100,000, at the rst close below $950,000, or after 100 trading days. With both methods, estimate the probability of a prot of at least $100,000, the probability of a loss, the expected prot and the expected holding time.
+
+```{r}
+
+# Exercise 7(c): Exit strategy
+
+set.seed(123)
+
+n_sim <- 10000
+n_days <- 100
+
+initial_value <- 1000000
+upper <- 1100000
+lower <- 950000
+debt <- 950000
+
+# Function to simulate exit strategy
+simulate_exit <- function(return_matrix) {
+
+  n_sim <- ncol(return_matrix)
+
+  profits <- numeric(n_sim)
+  holding_times <- integer(n_sim)
+
+  for (j in 1:n_sim) {
+
+    # Calculate investment path
+    wealth <- initial_value *
+      exp(cumsum(return_matrix[, j]))
+
+    # Find first threshold crossing
+    upper_hit <- which(wealth > upper)
+    lower_hit <- which(wealth < lower)
+
+    # First upper crossing
+    t_upper <- if (length(upper_hit) > 0) {
+      upper_hit[1]
+    } else {
+      Inf
+    }
+
+    # First lower crossing
+    t_lower <- if (length(lower_hit) > 0) {
+      lower_hit[1]
+    } else {
+      Inf
+    }
+
+    # Determine exit day
+    exit_day <- min(t_upper, t_lower, n_days)
+
+    # Determine exit value
+    exit_value <- wealth[exit_day]
+
+    # Calculate profit relative to own capital
+    profits[j] <- exit_value - debt
+
+    holding_times[j] <- exit_day
+  }
+
+  list(
+    profits = profits,
+    holding_times = holding_times
+  )
+}
+
+# Generate normal returns
+normal_returns_100 <- matrix(
+  rnorm(
+    n_sim * n_days,
+    mean = mu_crsp,
+    sd = sigma_crsp
+  ),
+  nrow = n_days,
+  ncol = n_sim
+)
+
+# Generate bootstrap returns
+bootstrap_returns_100 <- matrix(
+  sample(
+    crsp_log,
+    n_sim * n_days,
+    replace = TRUE
+  ),
+  nrow = n_days,
+  ncol = n_sim
+)
+
+# Run both methods
+normal_result <- simulate_exit(normal_returns_100)
+bootstrap_result <- simulate_exit(bootstrap_returns_100)
+
+# Summarize results
+summarize_exit <- function(result) {
+
+  p <- result$profits
+
+  c(
+    Prob_Profit_100k = mean(p >= 100000),
+    Prob_Loss = mean(p < 0),
+    Expected_Profit = mean(p),
+    Expected_Holding_Days = mean(result$holding_times)
+  )
+}
+
+results_7c <- rbind(
+  Normal = summarize_exit(normal_result),
+  Bootstrap = summarize_exit(bootstrap_result)
+)
+
+print(results_7c)
+
+```
+
+## (d) Do the normal and bootstrap results agree? Which one would you trust more, and why? Does the bootstrap capture volatility clustering?
+
+
+```{r}
+
+# Exercise 7(d): Test volatility clustering
+
+Box.test(
+  crsp_log^2,
+  lag = 20,
+  type = "Ljung-Box"
+)
+
+```
+### Exercise 7(d): Comparison of Normal and Bootstrap Methods
+
+###The normal and bootstrap simulation methods produce similar results for the specified investment strategy.
+
+###The probability of earning at least $100,000 is 57.11% under the normal model and 57.85% under the bootstrap model. The probability of a loss is 22.55% and 22.17%, respectively. Expected profits and holding periods are also relatively close.
+
+###The bootstrap method is useful because it preserves the empirical distribution of historical returns, including non-normal features such as skewness and extreme observations. However, ordinary bootstrap resampling independently selects individual observations and therefore destroys their chronological dependence.
+
+###The Ljung–Box test on squared CRSP returns produces a p-value below 2.2 × 10⁻¹⁶, providing strong evidence of autocorrelation in squared returns. This is consistent with volatility clustering.
+
+###Consequently, neither the independent normal model nor the ordinary bootstrap fully captures the temporal dependence in market volatility. A block bootstrap or a GARCH-type model could be considered to represent this behaviour more realistically.
+
+###Overall, the two methods provide similar estimates for this particular simulation, but their assumptions and limitations should be considered when interpreting financial risk.
