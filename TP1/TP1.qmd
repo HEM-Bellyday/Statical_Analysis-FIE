@@ -1454,3 +1454,88 @@ Box.test(
 ###Consequently, neither the independent normal model nor the ordinary bootstrap fully captures the temporal dependence in market volatility. A block bootstrap or a GARCH-type model could be considered to represent this behaviour more realistically.
 
 ###Overall, the two methods provide similar estimates for this particular simulation, but their assumptions and limitations should be considered when interpreting financial risk.
+
+
+
+
+
+# Exercise 8. Is the lognormal random walk a good model? (Eu-StockMarkets)
+
+##(a) For each index, compute the skewness, the excess kurtosis and the p-value of the Jarque Bera test of normality
+
+```{r}
+# Exercise 8: Testing the Random Walk Model
+
+data("EuStockMarkets")
+
+# Inspect the dataset
+str(EuStockMarkets)
+
+# Read documentation
+?EuStockMarkets
+
+# Summary statistics
+summary(EuStockMarkets)
+```
+
+```{r}
+# Calculate daily log returns
+returns <- diff(log(EuStockMarkets))
+
+# Inspect the returns
+head(returns)
+dim(returns)
+```
+
+```{r}
+# Install once if necessary
+library(moments)
+
+# Calculate skewness
+skew <- apply(returns, 2, skewness)
+
+# Calculate excess kurtosis
+kurt <- apply(returns, 2, kurtosis) - 3
+
+# Display results
+skew
+kurt
+```
+```{r}
+jb <- apply(returns, 2, jarque.test)
+
+jb_pvalues <- sapply(jb, function(x) x$p.value)
+
+jb_pvalues
+```
+
+```{r}
+options(digits = 15)
+
+jb_pvalues
+```
+
+## (b) For each index, compute the p-value of the LjungBox test with 10 lags on the log returns and on the squared log returns.
+
+```{r}
+# Ljung-Box test on daily log returns
+lb_returns <- apply(returns, 2, function(x) {
+  Box.test(x, lag = 10, type = "Ljung-Box")$p.value
+})
+
+# Ljung-Box test on squared daily log returns
+lb_squared <- apply(returns^2, 2, function(x) {
+  Box.test(x, lag = 10, type = "Ljung-Box")$p.value
+})
+
+# Display results
+lb_returns
+lb_squared
+```
+## The lognormal random walk is still a useful model despite its limitations. Although the Jarque–Bera test rejects the normality assumption for all four markets, and the Ljung–Box test reveals significant autocorrelation in squared returns, the model remains mathematically convenient and provides a simple framework for understanding financial prices and returns.
+
+## Log returns are particularly useful because multi-period returns can be calculated by summation, making financial calculations and modelling easier.
+
+## However, the model cannot fully capture the heavy tails, asymmetry and volatility clustering observed in real financial markets. Therefore, more advanced models may be needed when modelling market risk and volatility.
+
+## This illustrates the statement: "All models are false, but some are useful."
