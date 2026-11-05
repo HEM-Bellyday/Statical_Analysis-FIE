@@ -36,9 +36,9 @@ TP1/
 | 5 | Adjustment for Dividends | Completed |
 | 6 | Geometric Random Walk | Completed |
 | 7 | Leverage and Monte Carlo Simulation | Completed |
-| 8 | Testing the Random Walk Model | In Progress |
+| 8 | Testing the Random Walk Model | Completed |
 
-**Progress: 7/8 exercises completed (87.5%).**
+**Progress: 8/8 exercises completed (100%).**
 
 ## Key Topics and Methods
 
