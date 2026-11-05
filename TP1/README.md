@@ -2,7 +2,7 @@
 
 **Course:** Statistics and Data Analysis for Financial Engineering  
 **Software:** R / Quarto  
-**Status:** 7 of 8 exercises completed
+**Status:** 8 of 8 exercises completed
 
 ## Overview
 
